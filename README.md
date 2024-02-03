@@ -59,63 +59,59 @@ yarn build
 Pеализованы методы  onAll и  offAll  — для подписки на все события и сброса всех подписчиков. 
 Метод  trigger , генерирующий заданное событие с заданными аргументами. Это позволяет передавать его в качестве обработчика события в другие классы.
 
-```
-type EventName = string | RegExp;
-type Subscriber = Function;
-type EmitterEvent = {
-    eventName: string,
-    data: unknown
-};
-```
-
-```
-interface IEvents {
-    on<T extends object>(event: EventName, callback: (data: T) => void): void;
-    emit<T extends object>(event: string, data?: T): void;
-    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
-}
-```
-
 ### 2.	Класс Api
 Данный класс содержит базовый url и опции, которые необходимо добавить в запрос.
-Имеет два метода: get и post – для получения данных и отправки данных.
+Имеет три метода: get, post и delete – для получения данных,отправки и удаления данных.
 
-### 3.	Класс Component
+### 3.	Класс Component<T>
 Данный класс является абстрактным и необходим для создания компонентов интерфейса пользователя.
 
 Методы класса:
+    toggleClass - переключить класс.
+    setText - установить текстовое содержимое.
+    setImage - установить изображение.
+    setDisabled - сменить статус блокировки.
+    setHidden - скрыть элемент
+    setVisible - показать элемент.
+    render - вернуть корневой DOM-элемент.
 
-toggleClass - переключить класс.
-setText - установить текстовое содержимое.
-setImage - установить изображение с алтернативным текстом
-setDisabled - сменить статус блокировки.
-setHidden - скрыть элемент
-setVisible - показать элемент.
-render - вернуть корневой DOM-элемент
-
+### 4. Класс Model<T>
+Данный класс является абстрактным и необходим для создания структуры модели данных.
 
 ## Компоненты модели данных
 
 ### 1.	Класс Product
-Позволяет работать с товарами, запрашивает их с сервера и хранит данные о них.
+Класс для создания и упрвления данными продукта. Предоставляет информацию о продукте.
+```
+class Product extends Model<IProduct>
+```
 
+### 2.	Класс AppState
+Представляет состояние приложения, в том числе данные каталога, корзины, предпросмотра, заказа, ошибок формы. 
 ```
-export interface IProduct {
-  id: string;
-  category: string;
-  image: string;
-  title: string;
-  price: number | null;
-  description: string;
-}
+class AppState extends Model<IAppState>
 ```
+
+Методы класса:
+    setCatalog - устанавить каталог продуктов, каждый элемент преобразовать в экземпляр Product.
+    setPreview - устанавить предпросомотр продукта.
+    clearOrder - очистить данные заказа.
+    clearBasket - очистить данные корзины.
+    addProductBasket - добавить товар в корзину.
+    removeProductBasket - удалить товар из корзины.
+    updateBasket -  обновить данные корзины.
+    setField - устанавливает значени в данные доставки/личных данных заказа.
+    validateOrder - проверяет валидность формы доставки/личных данных.
 
 ## Компоненты представления
 
 ### 1.	Класс Page
 Класс отображает все элементы на странице: каталог товаров, счетчик товаров в корзине, не позволяет скроллить страницу.
+```
+class Page extends Component<IPage>
+```
 
-Методы класс:
+Методы класса:
     set counter - установить значение счетчика.
     set catalog - заменить содержимое каталога.
     set locked - блокировка скроллинга страницы при неоходимости (и наоборот).
@@ -123,52 +119,39 @@ export interface IProduct {
 
 ### 2.	Класс Form
 Класс для создания и управления формами. Здесь происходит обработка событий ввода/ отправки, отображение формы, проверка валидности формы.
+```
+class Form extends Component<IFormState>
+```
 
 Методы класса:
-    onInputChange() - обработчик событий ввода;
-    set valid() - возможность отправки формы при ее валидности;
+    onInputChange() - обработчик событий ввода.
+    set valid() - возможность отправки формы при ее валидности.
     set errors() - отображает ошибки валидации формы.
 
-```
-interface IFormState {
-    valid: boolean;
-    errors: string[];
-}
-```
 
 ### 3.	Класс Modal
 Данный класс реализует интерфейс модального окно. Возможности: открывать модальное окно, закрывть модальное окно, слушать события.
+```
+class Modal extends Component<IModalData>
+```
 
-```
-interface IModalData {
-    content: HTMLElement;
-}
-```
-```
-export interface Modal {
-	closeButton: HTMLButtonElement;
-    сontent: HTMLElement;
+Конструктор: constructor(container: HTMLElement, events: IEvents)
 
-	constructor(container: HTMLElement, events: IEvents);
-
-	openModal(): void;
-	closeModal(): void;
-}
-```
+Методы класса:
+    open - открыть модальное окно.
+    close - закрыть модальное окно.
 
 ### 4.	Класс Basket
 Реализует интерфейс модального окна корзины выбранных товаров. Дает возможность добавлять/ удалять товары в корзине.
-
 ```
-interface IBasketView {
-    items: HTMLElement[];
-    total: number;
-    selected: string[];
-}
+class Basket extends Component<IBasketView>
 ```
 
 ### 5.	Класс Card
-Данный класс реализует интерфейс карточки товара.
+Данный класс реализует интерфейс карточки товара. Предназначен для отображения и взаимодействия с карточками товара.
+```
+class Card extends Component<ICard>
+```
 
 Методы класса:
     set/get id - установить/получить индификатор карточки.
@@ -178,24 +161,23 @@ interface IBasketView {
     set image - установить/получить изображение товара.
     set description - установить/получить описание товара.
 
-```
-interface ICard<T> {
-    title: string;
-    description?: string | string[];
-    image: string;
-    status: T;
-}
-```
 
-### 6.	Класс OrderForm
-Реализует интерфейс карточки заказа (форма). В нем отображаются способ оплаты и адрес доставки.
+### 6.	Класс DeliveryForm
+Реализует интерфейс для взаимодействия с формой доставки. Возможно выбрать способ оплаты и ввести адрес доставки.
+```
+class DeliveryForm extends Component<IDeliveryForm>
+```
 
 Методы класса:
     toggleButton - переключает кнопки выбора способа оплаты.
     set address - устанавливает адрес доставки.
 
+
 ### 7.	Класс PersonalForm
-Реализует интерфейс для работы с модальным окном с персональными данными (форма): email и номер телефона покупателя.
+Реализует интерфейс для работы с формой с персональными данными. Вохможен ввод email и номера телефона покупателя.
+```
+class PersonalForm extends Component<IPersonalForm>
+```
 
 Методы класса:
     set phone - устанавить номер телефона.
@@ -203,15 +185,12 @@ interface ICard<T> {
 
 ### 8.	Класс Success
 Реализует интерфейс для работы с модальным окном при успешном оформлении заказа.
+```
+class Success extends Component<ISuccess>
+```
 
 В конструктор класса передается действие: 
     onClick: () => void;
 
 Метод класса: 
     set totalsum - устанавливает итоговую сумму покупки.
-
-```
-interface ISuccess {
-    total: number;
-}
-```
