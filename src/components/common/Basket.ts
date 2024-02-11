@@ -6,7 +6,7 @@ import { createElement, ensureElement } from '../../utils/utils';
 export class Basket extends Component<IBasketView> {
 	protected _list: HTMLElement;
 	protected _total: HTMLElement;
-	protected _button: HTMLElement;
+	protected _button: HTMLButtonElement;
 
 	constructor(container: HTMLElement, protected events: EventEmitter) {
 		super(container);
@@ -27,12 +27,14 @@ export class Basket extends Component<IBasketView> {
 	set items(items: HTMLElement[]) {
 		if (items.length) {
 			this._list.replaceChildren(...items);
+			this._button.disabled = false;
 		} else {
 			this._list.replaceChildren(
 				createElement<HTMLParagraphElement>('p', {
 					textContent: 'Корзина пуста',
 				})
 			);
+			this._button.disabled = true;
 		}
 	}
 

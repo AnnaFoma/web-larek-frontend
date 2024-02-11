@@ -49,8 +49,8 @@ const personal = new PersonalForm(cloneTemplate(personalTemplate), events);
 api
 	.getProductList()
 	.then(appData.setCatalog.bind(appData))
-	.catch((err) => {
-		console.log(err);
+	.catch((error) => {
+		console.error('Произошла ошибка:', error);
 	});
 
 // Изменились элементы каталога
@@ -116,6 +116,11 @@ events.on('modal:close', () => {
 	page.locked = false;
 });
 
+//Счетчик корзины
+events.on('counter:changed', (item: string[]) => {
+	page.counter = appData.basket.length;
+  })
+
 // Открыть корзину
 events.on('basket:open', () => {
 	modal.render({
@@ -160,7 +165,6 @@ events.on('payment:toggle', (target: HTMLElement) => {
 	if (!target.classList.contains('button_alt-active')) {
 		delivery.toggleButtons(target);
 		appData.order.payment = KindOfPayment[target.getAttribute('name')];
-		console.log(appData.order);
 	}
 });
 
@@ -210,6 +214,8 @@ events.on('contacts:submit', () => {
 	api
 		.orderProducts(appData.order)
 		.then((result) => {
+			appData.clearBasket();
+      		appData.clearOrder();
 			const success = new Success(cloneTemplate(successTemplate), {
 				onClick: () => {
 					modal.close();
